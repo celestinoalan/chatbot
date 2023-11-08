@@ -252,9 +252,9 @@ export default {
       };
 
       axios
-        .post("/chat", requestBody)
+        .post("http://127.0.0.1:5000/chat", requestBody)
         .then((response) => {
-          const answer = response.data.answer;
+          const answer = response.data.response;
 
           this.fullMesagesList.push({
             isMine: false,
