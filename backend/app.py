@@ -21,7 +21,7 @@ def chat():
     print(response)
     conversation_history.append({"role": "assistant", "content": response})
     print(conversation_history)
-    return flask.jsonify({'response': response})
+    return flask.jsonify({'message': conversation_history})
 
 
 def ask_chatgpt(messages: List[Dict[str, str]]) -> str:
