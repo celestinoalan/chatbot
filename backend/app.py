@@ -1,10 +1,13 @@
 import flask
 from typing import List, Dict
 from flask import Flask
-from openai import OpenAI
 import json
+from openai import OpenAI
+from flask_cors import CORS
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/chat": {"origins": "http://localhost:3000"}})
 
 with open("config.json", "r") as handle:
     config = json.load(handle)
