@@ -1,5 +1,5 @@
 <template>
-  <div class="bubble_chat_wrapper" :style="{[position]: 0}">
+  <div class="bubble_chat_wrapper" :style="{ [position]: 0 }">
     <transition name="slide">
       <div class="bubble_chat_wrapper__rolled_up" v-show="!windowMode">
         <div class="messages_list">
@@ -8,9 +8,11 @@
             v-for="(msgItem, index) in activeMessages"
             @click="openChat"
             :key="index + '_bubbles'"
-            :class="{'hiding-out': index === 0 && messageUpdating, 
-                        'showing-in' : index === 2 && messageUpdating,
-                        'shake-it': index === 1 && messageUpdating}"
+            :class="{
+              'hiding-out': index === 0 && messageUpdating,
+              'showing-in': index === 2 && messageUpdating,
+              'shake-it': index === 1 && messageUpdating,
+            }"
           >
             <div class="messages_list__item___sender">
               <img
@@ -19,12 +21,16 @@
                 :alt="msgItem[senderNameField]"
               />
               <span v-if="!msgItem[avatarLinkField]">
-                  {{msgItem[senderNameField] ? msgItem[senderNameField].charAt(0).toUpperCase() : '?' }}
-                </span>
+                {{
+                  msgItem[senderNameField]
+                    ? msgItem[senderNameField].charAt(0).toUpperCase()
+                    : "?"
+                }}
+              </span>
             </div>
             <div class="messages_list__item___message">
-              <span class="name">{{msgItem[senderNameField]}}</span>
-              <span>{{msgItem[textField]}}</span>
+              <span class="name">{{ msgItem[senderNameField] }}</span>
+              <span>{{ msgItem[textField] }}</span>
             </div>
           </div>
         </div>
@@ -35,22 +41,34 @@
       <div class="bubble_chat_wrapper__rolled_down" v-show="windowMode">
         <div class="bubble_chat_wrapper__rolled_down__list" ref="scrollWrapper">
           <div class="scroll">
-            <div v-for="(msgObj, index) in fullMesagesList" :key="index" :class="{'mine': msgObj.isMine}">
-                <div>
-                    <img v-if="msgObj[avatarLinkField]" :src="msgObj[avatarLinkField]" alt="avatar" />
-                    <span class="no_image" v-if="!msgObj[avatarLinkField]">
-                        {{msgObj[senderNameField] ? msgObj[senderNameField].charAt(0).toUpperCase() : '?' }}
-                    </span>
-                    <span class="name">{{msgObj[senderNameField]}}</span>
-                    <span class="msg">{{msgObj[textField]}}</span>
-                </div>
+            <div
+              v-for="(msgObj, index) in fullMesagesList"
+              :key="index"
+              :class="{ mine: msgObj.isMine }"
+            >
+              <div>
+                <img
+                  v-if="msgObj[avatarLinkField]"
+                  :src="msgObj[avatarLinkField]"
+                  alt="avatar"
+                />
+                <span class="no_image" v-if="!msgObj[avatarLinkField]">
+                  {{
+                    msgObj[senderNameField]
+                      ? msgObj[senderNameField].charAt(0).toUpperCase()
+                      : "?"
+                  }}
+                </span>
+                <span class="name">{{ msgObj[senderNameField] }}</span>
+                <span class="msg">{{ msgObj[textField] }}</span>
+              </div>
             </div>
           </div>
         </div>
         <div class="bubble_chat_wrapper__rolled_down__input">
-          <textarea 
+          <textarea
             v-model="newMessageText"
-            placeholder="Use 'Shift + Enter' to send" 
+            placeholder="Use 'Shift + Enter' to send"
             v-on:keyup.enter.shift="sendMessage"
           ></textarea>
         </div>
@@ -58,7 +76,11 @@
     </transition>
 
     <div class="bubble_chat_wrapper__control" @click="openChat">
-      <span class="new_mesages" v-show="!windowMode && unredMessagesCount > 0">{{unredMessagesCount}}</span>
+      <span
+        class="new_mesages"
+        v-show="!windowMode && unredMessagesCount > 0"
+        >{{ unredMessagesCount }}</span
+      >
       <svg
         v-if="!windowMode"
         xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +90,13 @@
         x="0px"
         y="0px"
         viewBox="0 0 524.184 524.184"
-        style="enable-background:new 0 0 524.184 524.184;fill: #fff;-webkit-transform: scale(.6);-ms-transform: scale(.6);transform: scale(.6);"
+        style="
+          enable-background: new 0 0 524.184 524.184;
+          fill: #fff;
+          -webkit-transform: scale(0.6);
+          -ms-transform: scale(0.6);
+          transform: scale(0.6);
+        "
         xml:space="preserve"
       >
         <g>
@@ -117,10 +145,13 @@
         x="0px"
         y="0px"
         viewBox="0 0 47.971 47.971"
-        style="enable-background:new 0 0 47.971 47.971;fill: #fff;
-    -webkit-transform: scale(.3);
-        -ms-transform: scale(.3);
-            transform: scale(.3);"
+        style="
+          enable-background: new 0 0 47.971 47.971;
+          fill: #fff;
+          -webkit-transform: scale(0.3);
+          -ms-transform: scale(0.3);
+          transform: scale(0.3);
+        "
         xml:space="preserve"
       >
         <g>
@@ -145,18 +176,19 @@
         <g />
       </svg>
     </div>
-
   </div>
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: "BubbleChat",
   props: {
     position: {
       type: String,
       default: "right",
-      validator: value => value === "right" || value === "left"
+      validator: (value) => value === "right" || value === "left",
     },
     messages: {
       type: Array,
@@ -164,114 +196,139 @@ export default {
     },
     textField: {
       type: String,
-      default: 'text'
+      default: "text",
     },
     senderNameField: {
       type: String,
-      default: 'name'
+      default: "name",
     },
     avatarLinkField: {
-      type: String
-    }
+      type: String,
+    },
   },
   data() {
     return {
       messageUpdating: false,
       windowMode: false,
-      newMessageText: '',
+      newMessageText: "",
       fullMesagesList: [],
-      checkedMessages: 0
+      checkedMessages: 0,
     };
   },
   computed: {
     notMineMessages() {
-      return this.fullMesagesList.filter((msg) => !msg.isMine).length
+      return this.fullMesagesList.filter((msg) => !msg.isMine).length;
     },
     unredMessagesCount() {
-      return this.notMineMessages - this.checkedMessages
+      return this.notMineMessages - this.checkedMessages;
     },
     activeMessages() {
-      if (this.windowMode) return
+      if (this.windowMode) return;
 
       return this.fullMesagesList.length > 3
-        ? [...this.fullMesagesList.slice(Math.max(this.fullMesagesList.length - 3, 1))].reverse()
-        : [...this.fullMesagesList].reverse()
-    }
+        ? [
+            ...this.fullMesagesList.slice(
+              Math.max(this.fullMesagesList.length - 3, 1)
+            ),
+          ].reverse()
+        : [...this.fullMesagesList].reverse();
+    },
   },
   methods: {
     sendMessage() {
-        const msg = Object.assign({}, {
-                isMine: true,
-                [this.$props.textField]: this.newMessageText, 
-                [this.$props.senderNameField]: 'me'
-            }
-        )
-        this.fullMesagesList.push(msg)
-        this.newMessageText = ''
+      const msg = Object.assign(
+        {},
+        {
+          isMine: true,
+          [this.$props.textField]: this.newMessageText,
+          [this.$props.senderNameField]: "me",
+        }
+      );
+
+      this.fullMesagesList.push(msg);
+
+      const requestBody = {
+        message: this.newMessageText,
+      };
+
+      axios
+        .post("/chat", requestBody)
+        .then((response) => {
+          const answer = response.data.answer;
+
+          this.fullMesagesList.push({
+            isMine: false,
+            [this.$props.textField]: answer,
+            [this.$props.senderNameField]: "ChatAI",
+          });
+        })
+        .catch((error) => {
+          console.error("Erro ao enviar a mensagem: ", error);
+        });
+
+      this.newMessageText = "";
     },
     scrollDownChat() {
-        if(this.windowMode) {
-            setTimeout(() => {
-              this.$refs.scrollWrapper.scrollTop = this.$refs.scrollWrapper.scrollHeight
-            }, 100)
-        }
+      if (this.windowMode) {
+        setTimeout(() => {
+          this.$refs.scrollWrapper.scrollTop =
+            this.$refs.scrollWrapper.scrollHeight;
+        }, 100);
+      }
     },
     openChat() {
-      this.checkedMessages = this.notMineMessages
+      this.checkedMessages = this.notMineMessages;
       this.windowMode = !this.windowMode;
-      this.scrollDownChat()
-    }
+      this.scrollDownChat();
+    },
   },
   created() {
     this.fullMesagesList = this.$props.messages;
   },
   watch: {
-    'fullMesagesList': function(e) {
+    fullMesagesList: function (e) {
       this.messageUpdating = true;
-      this.$emit('chatWasUpdated', {chatState: this.fullMesagesList })
+      this.$emit("chatWasUpdated", { chatState: this.fullMesagesList });
       setTimeout(() => {
         this.messageUpdating = false;
       }, 200);
-      this.scrollDownChat()
-    }
+      this.scrollDownChat();
+    },
   },
 };
 </script>
 
 <style>
-
 @-webkit-keyframes bubble-show-up {
-    from {
-        -webkit-transform: translate(100%, 100%);
-                transform: translate(100%, 100%);
-        opacity: 0;
-    }
+  from {
+    -webkit-transform: translate(100%, 100%);
+    transform: translate(100%, 100%);
+    opacity: 0;
+  }
 
-    to {
-        -webkit-transform: translate(0%, 0%);
-                transform: translate(0%, 0%);
-        opacity: 1;
-    }
+  to {
+    -webkit-transform: translate(0%, 0%);
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
 }
 @keyframes bubble-show-up {
-    from {
-        -webkit-transform: translate(100%, 100%);
-                transform: translate(100%, 100%);
-        opacity: 0;
-    }
+  from {
+    -webkit-transform: translate(100%, 100%);
+    transform: translate(100%, 100%);
+    opacity: 0;
+  }
 
-    to {
-        -webkit-transform: translate(0%, 0%);
-                transform: translate(0%, 0%);
-        opacity: 1;
-    }
+  to {
+    -webkit-transform: translate(0%, 0%);
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
 }
-
-
 
 .slide {
   -webkit-backface-visibility: hidden;
-          backface-visibility: hidden;
+  backface-visibility: hidden;
   z-index: 1;
 }
 
@@ -380,17 +437,17 @@ export default {
 
 .shake-it {
   -webkit-animation: shaking 0.2s ease-in;
-          animation: shaking 0.2s ease-in;
+  animation: shaking 0.2s ease-in;
 }
 
 .hiding-out {
   -webkit-animation: hideMessage 0.2s ease-out;
-          animation: hideMessage 0.2s ease-out;
+  animation: hideMessage 0.2s ease-out;
 }
 
 .showing-in {
   -webkit-animation: showMessage 0.2s ease-in;
-          animation: showMessage 0.2s ease-in;
+  animation: showMessage 0.2s ease-in;
 }
 
 html,
@@ -404,7 +461,7 @@ body {
 .bubble_chat_wrapper,
 .bubble_chat_wrapper * {
   -webkit-box-sizing: border-box;
-          box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 .bubble_chat_wrapper {
@@ -420,11 +477,11 @@ body {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: reverse;
-      -ms-flex-direction: column-reverse;
-          flex-direction: column-reverse;
+  -ms-flex-direction: column-reverse;
+  flex-direction: column-reverse;
   -webkit-box-align: end;
-      -ms-flex-align: end;
-          align-items: flex-end;
+  -ms-flex-align: end;
+  align-items: flex-end;
 }
 
 /* bubble mode */
@@ -456,7 +513,7 @@ body {
   max-width: 100%;
   border-radius: 10px;
   background-color: #fff;
-  -webkit-box-shadow: 0 0 20px rgba(208, 208, 208, 0.3);    
+  -webkit-box-shadow: 0 0 20px rgba(208, 208, 208, 0.3);
   box-shadow: 0 0 20px rgba(208, 208, 208, 0.3);
   height: 100px;
   -webkit-transition: 0.2s;
@@ -467,17 +524,36 @@ body {
   bottom: 0;
   overflow: hidden;
 }
-.bubble_chat_wrapper .bubble_chat_wrapper__rolled_up .messages_list__item::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(75%, transparent), color-stop(80%, rgba(255, 255, 255, .5)), color-stop(98%, rgb(255, 255, 255, 1)));
-    background-image: -o-linear-gradient(top, transparent 75%, rgba(255, 255, 255, .5) 80%, rgb(255, 255, 255, 1) 98%);
-    background-image: linear-gradient(180deg, transparent 75%, rgba(255, 255, 255, .5) 80%, rgb(255, 255, 255, 1) 98%);
-    z-index: 10;
+.bubble_chat_wrapper
+  .bubble_chat_wrapper__rolled_up
+  .messages_list__item::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(75%, transparent),
+    color-stop(80%, rgba(255, 255, 255, 0.5)),
+    color-stop(98%, rgb(255, 255, 255, 1))
+  );
+  background-image: -o-linear-gradient(
+    top,
+    transparent 75%,
+    rgba(255, 255, 255, 0.5) 80%,
+    rgb(255, 255, 255, 1) 98%
+  );
+  background-image: linear-gradient(
+    180deg,
+    transparent 75%,
+    rgba(255, 255, 255, 0.5) 80%,
+    rgb(255, 255, 255, 1) 98%
+  );
+  z-index: 10;
 }
 
 .bubble_chat_wrapper
@@ -486,8 +562,8 @@ body {
   bottom: 85px;
   z-index: 1;
   -webkit-transform: scale(0.8);
-      -ms-transform: scale(0.8);
-          transform: scale(0.8);
+  -ms-transform: scale(0.8);
+  transform: scale(0.8);
 }
 
 .bubble_chat_wrapper
@@ -495,9 +571,9 @@ body {
   .messages_list__item:nth-of-type(2) {
   bottom: 45px;
   -webkit-transform: scale(0.9);
-      -ms-transform: scale(0.9);
-          transform: scale(0.9);
-    z-index: 2;
+  -ms-transform: scale(0.9);
+  transform: scale(0.9);
+  z-index: 2;
 }
 
 .bubble_chat_wrapper
@@ -505,15 +581,15 @@ body {
   .messages_list__item:nth-of-type(1) {
   bottom: 0;
   -webkit-transform: scale(1);
-      -ms-transform: scale(1);
-          transform: scale(1);
-    z-index: 3;
+  -ms-transform: scale(1);
+  transform: scale(1);
+  z-index: 3;
 }
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_up
   .messages_list__item:hover {
-  -webkit-box-shadow: 0 0 20px rgba(208, 208, 208, 0.8);    
+  -webkit-box-shadow: 0 0 20px rgba(208, 208, 208, 0.8);
   box-shadow: 0 0 20px rgba(208, 208, 208, 0.8);
   -webkit-transition: 0.2s;
   -o-transition: 0.2s;
@@ -525,16 +601,16 @@ body {
   .bubble_chat_wrapper__rolled_up
   .messages_list__item:nth-of-type(2):hover {
   -webkit-transform: scale(0.95) translate(0, -25px);
-      -ms-transform: scale(0.95) translate(0, -25px);
-          transform: scale(0.95) translate(0, -25px);
+  -ms-transform: scale(0.95) translate(0, -25px);
+  transform: scale(0.95) translate(0, -25px);
 }
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_up
   .messages_list__item:nth-of-type(3):hover {
   -webkit-transform: scale(0.85) translate(0, -30px);
-      -ms-transform: scale(0.85) translate(0, -30px);
-          transform: scale(0.85) translate(0, -30px);
+  -ms-transform: scale(0.85) translate(0, -30px);
+  transform: scale(0.85) translate(0, -30px);
 }
 
 .bubble_chat_wrapper
@@ -585,11 +661,11 @@ body {
   display: -ms-flexbox;
   display: flex;
   -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
   -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
   color: #fff;
   font-size: 30px;
   font-weight: 100;
@@ -631,7 +707,7 @@ body {
   span {
   overflow: hidden;
   -o-text-overflow: ellipsis;
-     text-overflow: ellipsis;
+  text-overflow: ellipsis;
 }
 
 .bubble_chat_wrapper
@@ -684,16 +760,16 @@ body {
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   position: fixed;
   bottom: 60px;
   padding: 2px;
   background-color: #abc3ff;
   border-radius: 5px;
   -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
 .bubble_chat_wrapper
@@ -710,150 +786,198 @@ body {
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll {
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
   -webkit-box-pack: end;
-      -ms-flex-pack: end;
-          justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
   -webkit-box-align: end;
-      -ms-flex-align: end;
-          align-items: flex-end;
+  -ms-flex-align: end;
+  align-items: flex-end;
   padding-right: 15px;
-      min-height: 100%;
-    -webkit-box-pack: end;
-    -ms-flex-pack: end;
-            justify-content: flex-end;
+  min-height: 100%;
+  -webkit-box-pack: end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+}
+
+.bubble_chat_wrapper .bubble_chat_wrapper__rolled_down::before {
+  content: "";
+  position: absolute;
+  width: calc(100% - 4px);
+  height: 100%;
+  top: 2px;
+  left: 2px;
+  background-image: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(3%, #fff),
+    color-stop(10%, rgba(255, 255, 255, 0.3)),
+    color-stop(20%, transparent),
+    to(transparent)
+  );
+  background-image: -o-linear-gradient(
+    top,
+    #fff 3%,
+    rgba(255, 255, 255, 0.3) 10%,
+    transparent 20%,
+    transparent 100%
+  );
+  background-image: linear-gradient(
+    -180deg,
+    #fff 3%,
+    rgba(255, 255, 255, 0.3) 10%,
+    transparent 20%,
+    transparent 100%
+  );
+  z-index: 10;
+  border-radius: 4px;
+  pointer-events: none !important;
 }
 
 .bubble_chat_wrapper
-  .bubble_chat_wrapper__rolled_down::before {
-    content: '';
-    position: absolute;
-    width: calc(100% - 4px);
-    height: 100%;
-    top: 2px;
-    left: 2px;
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(3%, #fff), color-stop(10%, rgba(255, 255, 255, 0.3)), color-stop(20%, transparent), to(transparent));
-    background-image: -o-linear-gradient(top, #fff 3%, rgba(255, 255, 255, 0.3) 10%, transparent 20%, transparent 100%);
-    background-image: linear-gradient(-180deg, #fff 3%, rgba(255, 255, 255, 0.3) 10%, transparent 20%, transparent 100%);
-    z-index: 10;
-    border-radius: 4px;
-    pointer-events: none!important;
+  .bubble_chat_wrapper__rolled_down
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div {
+  border-radius: 10px;
+  width: 90%;
+  -webkit-box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 3px 0px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  margin: 8px 0;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  position: relative;
+  -webkit-animation: 0.2s bubble-show-up ease-in-out;
+  animation: 0.2s bubble-show-up ease-in-out;
 }
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div {
-    border-radius: 10px;
-    width: 90%;
-    -webkit-box-shadow: 0 0 3px 0px rgba(0,0,0,.3);
-            box-shadow: 0 0 3px 0px rgba(0,0,0,.3);
-    padding: 10px;
-    margin: 8px 0;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-        -ms-flex-direction: column;
-            flex-direction: column;
-    position: relative;
-    -webkit-animation: .2s bubble-show-up ease-in-out;
-        animation: .2s bubble-show-up ease-in-out;
-  }
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div.mine {
+  background-color: #e5edff;
+  -ms-flex-item-align: start;
+  align-self: flex-start;
+}
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div.mine {
-    background-color: #e5edff;
-    -ms-flex-item-align: start;
-        align-self: flex-start;
-  }
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div.mine
+  img,
+.bubble_chat_wrapper
+  .bubble_chat_wrapper__rolled_down
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div.mine
+  span.no_image,
+.bubble_chat_wrapper
+  .bubble_chat_wrapper__rolled_down
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div.mine
+  span.name {
+  display: none;
+}
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div.mine img,
-.bubble_chat_wrapper
-  .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div.mine span.no_image,
-.bubble_chat_wrapper
-  .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div.mine span.name  {
-    display: none;
-  }
-
-  .bubble_chat_wrapper
-  .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div > div {
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-orient: vertical;
-    -webkit-box-direction: normal;
-    -ms-flex-direction: column;
-            flex-direction: column;
-    -webkit-box-align: start;
-    -ms-flex-align: start;
-            align-items: flex-start;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div
+  > div {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: start;
+  -ms-flex-align: start;
+  align-items: flex-start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div img,
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div
+  img,
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div span.no_image {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    position: absolute;
-    left: -25px;
-    bottom: 5px;
-    background-color: #808080;
-    font-size: 10px;
-    color: #fff;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-align: center;
-        -ms-flex-align: center;
-            align-items: center;
-    -webkit-box-pack: center;
-        -ms-flex-pack: center;
-            justify-content: center;
-  }
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div
+  span.no_image {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  position: absolute;
+  left: -25px;
+  bottom: 5px;
+  background-color: #808080;
+  font-size: 10px;
+  color: #fff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+}
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div span.msg {
-      font-size: 13px;
-      color: #2c2c3e;
-      letter-spacing: .3px;
-      white-space: pre-line;
-      width: 100%;
-      text-align: left;
-      overflow: hidden;
-      text-overflow: ellipsis;
- }
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div
+  span.msg {
+  font-size: 13px;
+  color: #2c2c3e;
+  letter-spacing: 0.3px;
+  white-space: pre-line;
+  width: 100%;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
-  .bubble_chat_wrapper__rolled_down__list .scroll > div span.name {
-    font-size: 13px;
-    font-weight: 500;
-    text-transform: capitalize;
-    color: #696969;
-    margin-bottom: 5px;
-    text-align: left;
-  }
+  .bubble_chat_wrapper__rolled_down__list
+  .scroll
+  > div
+  span.name {
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+  color: #696969;
+  margin-bottom: 5px;
+  text-align: left;
+}
 
 .bubble_chat_wrapper
   .bubble_chat_wrapper__rolled_down
@@ -884,7 +1008,7 @@ body {
   background-color: #4f7dec;
   display: block;
   -webkit-box-shadow: 0 0 10px rgba(44, 142, 255, 0.5);
-          box-shadow: 0 0 10px rgba(44, 142, 255, 0.5);
+  box-shadow: 0 0 10px rgba(44, 142, 255, 0.5);
   cursor: pointer;
   -webkit-transition: 0.4s;
   -o-transition: 0.4s;
@@ -893,25 +1017,25 @@ body {
 }
 .bubble_chat_wrapper .bubble_chat_wrapper__control span.new_mesages {
   position: absolute;
-    width: 20px;
-    height: 20px;
-    display: block;
-    border-radius: 50%;
-    background-color: #e05f1f;
-    color: #fff;
-    display: flex;
-    align-items: center;
-    font-size: 12px;
-    justify-content: center;
-    left: -5px;
-    top: 0px;
-    z-index: 10;
+  width: 20px;
+  height: 20px;
+  display: block;
+  border-radius: 50%;
+  background-color: #e05f1f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  justify-content: center;
+  left: -5px;
+  top: 0px;
+  z-index: 10;
 }
 .bubble_chat_wrapper .bubble_chat_wrapper__control:hover {
   -webkit-transition: 0.4s;
   -o-transition: 0.4s;
   transition: 0.4s;
   -webkit-box-shadow: 0 0 10px rgba(44, 142, 255, 1);
-          box-shadow: 0 0 10px rgba(44, 142, 255, 1);
+  box-shadow: 0 0 10px rgba(44, 142, 255, 1);
 }
 </style>
