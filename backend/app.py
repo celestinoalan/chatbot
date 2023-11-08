@@ -12,14 +12,10 @@ CORS(app, resources={r"/chat": {"origins": "http://localhost:3000"}})
 with open("config.json", "r") as handle:
     config = json.load(handle)
 
-conversation_history = [{"role": "system", "content": "You are a helpful assistant."}]
-
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_message = flask.request.json['message']
-    print(user_message)
-    conversation_history.append({"role": "user", "content": user_message})
+    conversation_history = flask.request.json['message']
     print(conversation_history)
     response = ask_chatgpt(messages=conversation_history)
     print(response)
