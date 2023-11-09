@@ -244,4 +244,4 @@ sw.*
 *.swp
 
 # Custom directories
-./backend/thrash
+./backend/thrash*
