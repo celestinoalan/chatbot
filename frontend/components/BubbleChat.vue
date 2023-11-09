@@ -235,6 +235,55 @@ export default {
     },
   },
   methods: {
+    convertMessagesForBackend(messages) {
+      return messages.map((message) => ({
+        role: message.isMine ? "user" : "assistant",
+        content: message.text,
+      }));
+    },
+
+    // sendMessage() {
+    //   const msg = Object.assign(
+    //     {},
+    //     {
+    //       isMine: true,
+    //       [this.$props.textField]: this.newMessageText,
+    //       [this.$props.senderNameField]: "me",
+    //     }
+    //   );
+
+    //   this.fullMesagesList.push(msg);
+
+    //   const requestBody = {
+    //     message: [{ role: "user", content: this.newMessageText }],
+    //   };
+
+    //   axios
+    //     .post("http://127.0.0.1:5000/chat", requestBody)
+    //     .then((response) => {
+    //       const responseData = response.data;
+
+    //       const assistantMessages = responseData.message.filter(
+    //         (message) => message.role === "assistant"
+    //       );
+
+    //       if (assistantMessages.length > 0) {
+    //         const assistantContent = assistantMessages[0].content;
+
+    //         this.fullMesagesList.push({
+    //           isMine: false,
+    //           [this.$props.textField]: assistantContent,
+    //           [this.$props.senderNameField]: "ChatAI",
+    //         });
+    //       }
+    //     })
+    //     .catch((error) => {
+    //       console.error("Erro ao enviar a mensagem: ", error);
+    //     });
+
+    //   this.newMessageText = "";
+    // },
+
     sendMessage() {
       const msg = Object.assign(
         {},
@@ -247,21 +296,20 @@ export default {
 
       this.fullMesagesList.push(msg);
 
+      const messagesToSend = this.convertMessagesForBackend(
+        this.fullMesagesList
+      );
+
       const requestBody = {
-        message: [{ role: "user", content: this.newMessageText }],
+        message: messagesToSend,
       };
 
       axios
         .post("http://127.0.0.1:5000/chat", requestBody)
         .then((response) => {
-          const responseData = response.data;
-
-          const assistantMessages = responseData.message.filter(
-            (message) => message.role === "assistant"
-          );
-
-          if (assistantMessages.length > 0) {
-            const assistantContent = assistantMessages[0].content;
+          if (response.data.message.length > 0) {
+            const assistantContent =
+              response.data.message[response.data.message.length - 1].content;
 
             this.fullMesagesList.push({
               isMine: false,
@@ -276,6 +324,7 @@ export default {
 
       this.newMessageText = "";
     },
+
     scrollDownChat() {
       if (this.windowMode) {
         setTimeout(() => {
