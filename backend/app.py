@@ -33,7 +33,7 @@ def chat():
 def ask_chatgpt(messages: List[Dict[str, str]]) -> str:
     client = OpenAI(api_key=config["openai-api-key"])
     chat_completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=messages,
         temperature=0
     )
