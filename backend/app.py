@@ -34,7 +34,8 @@ def ask_chatgpt(messages: List[Dict[str, str]]) -> str:
     client = OpenAI(api_key=config["openai-api-key"])
     chat_completion = client.chat.completions.create(
         model="gpt-3.5-turbo",
-        messages=messages
+        messages=messages,
+        temperature=0
     )
     return chat_completion.choices[0].message.content
 
