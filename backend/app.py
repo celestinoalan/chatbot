@@ -27,8 +27,8 @@ def estimate_conversation_cost(conversation_history: List[Dict[str, str]]) -> fl
         cost = input_cost if role in ("system", "user") else output_cost
         return len(message_text.split(" ")) * cost
 
-    input_cost = 0.03 * 4.91
-    output_cost = 0.06 * 4.91
+    input_cost = 0.03 * 4.91 / 1000
+    output_cost = 0.06 * 4.91 / 1000
     total_cost = 0
     for message in conversation_history:
         total_cost += _estimate_message_cost(message_text=message["content"], role=message["role"])
