@@ -248,19 +248,27 @@ export default {
       this.fullMesagesList.push(msg);
 
       const requestBody = {
-        message: this.newMessageText,
+        message: [{ role: "user", content: this.newMessageText }],
       };
 
       axios
         .post("http://127.0.0.1:5000/chat", requestBody)
         .then((response) => {
-          const answer = response.data.response;
+          const responseData = response.data;
 
-          this.fullMesagesList.push({
-            isMine: false,
-            [this.$props.textField]: answer,
-            [this.$props.senderNameField]: "ChatAI",
-          });
+          const assistantMessages = responseData.message.filter(
+            (message) => message.role === "assistant"
+          );
+
+          if (assistantMessages.length > 0) {
+            const assistantContent = assistantMessages[0].content;
+
+            this.fullMesagesList.push({
+              isMine: false,
+              [this.$props.textField]: assistantContent,
+              [this.$props.senderNameField]: "ChatAI",
+            });
+          }
         })
         .catch((error) => {
           console.error("Erro ao enviar a mensagem: ", error);
